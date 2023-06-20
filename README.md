@@ -1,6 +1,4 @@
-# GlowNet
-3D Models can be found at:
-----https://cad.onshape.com/documents/83dc1b9d5794af9812a20a6e/w/6933c0ec732fa80879dfa10f/e/393d556f8704af149a6ea895----
+3D Models can be found on[OnShape](https://cad.onshape.com/documents/83dc1b9d5794af9812a20a6e/w/6933c0ec732fa80879dfa10f/e/393d556f8704af149a6ea895)<br><br>
 You can fork the design here and make your own version, or simply export out what has been designed
 
 BOM:<br>
