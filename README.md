@@ -1,3 +1,8 @@
+What is GlowNet?
+After the shooting in Nashville, I set out to design and program an entire system that will use off the shelf components found in the maker industry and utilize 3D printing to develop a early action notification system for churches, schools, non-profits. The design is open source and when officially released will only benefit from the continued development of the maker community. This tool will easily install any class room using a single POE-ethernet connection. A on-prem or cloud server interface will communicate what the emergency state is. By visual and auditory cues the teacher/instructors will understand the best response. 
+
+Example: In the event of a fire, you can delay evacuation until fire is confirmed and then you can use this system to indicate that evacuation is necessary.  Or if a tornado is approaching early warning services will send to a central office where  person can evaulate and signal for shelter in place.
+
 3D Models can be found here on [OnShape](https://cad.onshape.com/documents/83dc1b9d5794af9812a20a6e/w/6933c0ec732fa80879dfa10f/e/393d556f8704af149a6ea895)<br><br>
 You can fork the design here and make your own version, or simply export out what has been designed
 

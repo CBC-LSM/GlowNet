@@ -27,8 +27,8 @@ Preferences profiles;
 //const char* ssid = ";
 //const char* password = "";
 
-const char* ssid = ""; //Set WiFi SSID
-const char* password = ""; //Set WiFi password
+const char* ssid = "ONA_COV"; //Set WiFi SSID
+const char* password = "!ONA201207"; //Set WiFi password
 
 const char* apiuser = "api";
 const char* apikey = ""; //set apikey
