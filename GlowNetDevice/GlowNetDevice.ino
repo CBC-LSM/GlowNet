@@ -27,15 +27,15 @@ Preferences profiles;
 //const char* ssid = ";
 //const char* password = "";
 
-const char* ssid = "ONA_COV"; //Set WiFi SSID
-const char* password = "!ONA201207"; //Set WiFi password
+const char* ssid = ""; //Set WiFi SSID
+const char* password = ""; //Set WiFi password
 
 const char* apiuser = "api";
-const char* apikey = ""; //set apikey
+const char* apikey = "1234"; //set apikey
 
-const int ledPin = 2;
+const int ledPin = 0;
 const int buttonPin = 4;
-const int buzzerPin = 0;
+const int buzzerPin = 1;
 int buttonState = 0;
 #define NUM_LEDS 12
 CRGB leds[NUM_LEDS];
@@ -145,18 +145,41 @@ void setup() {
 
   profiles.begin("profiles", false);
 
+  // OFF
   profiles.putULong("00-color", 0x000000);
   profiles.putInt("00-hertz", 0);
   profiles.putInt("00-timeLength", 0);
 
+  //Yellow
   profiles.putULong("01-color", 0xFFFF00);
   profiles.putInt("01-hertz", 5000);
   profiles.putInt("01-timeLength", 1000);
+  
+  //Green
+  profiles.putULong("02-color", 0x00FF00);
+  profiles.putInt("02-hertz", 5000);
+  profiles.putInt("02-timeLength", 1000);
 
-  profiles.begin("profiles", false);
-  profiles.putULong("02-color", 0x00FFFF);
-  profiles.putInt("02-hertz", 1000);
-  profiles.putInt("02-timeLength", 3000);
+  //Red
+  profiles.putULong("03-color", 0xFF0000);
+  profiles.putInt("03-hertz", 5000);
+  profiles.putInt("03-timeLength", 1000);
+
+  //Blue
+  profiles.putULong("04-color", 0x0000FF);
+  profiles.putInt("04-hertz", 5000);
+  profiles.putInt("04-timeLength", 1000);
+
+  //Purple
+  profiles.putULong("05-color", 0xA020F0);
+  profiles.putInt("05-hertz", 5000);
+  profiles.putInt("05-timeLength", 1000);
+
+  // profiles.begin("profiles", false);
+  //Orange
+  profiles.putULong("06-color", 0xFFA500);
+  profiles.putInt("06-hertz", 1000);
+  profiles.putInt("06-timeLength", 3000);
 
   profiles.end();
 
