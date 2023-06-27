@@ -19,23 +19,15 @@ This program is run on an ESP32 and accepts API requests to change an LED Ring's
 #include <FastLED.h>
 #include <Preferences.h>
 
+#include "configuration.h"
+
 //Setup preferences
 Preferences profiles;
 
 
-//Declare Variables
-//const char* ssid = ";
-//const char* password = "";
-
-const char* ssid = ""; //Set WiFi SSID
-const char* password = ""; //Set WiFi password
-
-const char* apiuser = "api";
-const char* apikey = "1234"; //set apikey
-
-const int ledPin = 0;
+const int ledPin = 3;
 const int buttonPin = 4;
-const int buzzerPin = 1;
+const int buzzerPin = 2;
 int buttonState = 0;
 #define NUM_LEDS 12
 CRGB leds[NUM_LEDS];
@@ -62,21 +54,51 @@ const char index_html[] PROGMEM = R"rawliteral(
   </html>
 )rawliteral";
 
+const char profileUpdate_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Update Profiles</title>
+</head>
+  <body>
+    <h1>Edit Profiles</h1>
+    <form action='' method='get'>
+    <label for='profileNumber'>Profile Number:</label>
+    <input required type='number' size='2' max='99' min='0' id='profileNumber' name='profileNumber' value='%PROFILEPLACEHOLDER%'><br>
+    <label for='color'>LED Color:</label>
+    <input required type='color' name='color' id='color' value='#FFFFFF'><br>
+    <label for='hertz'>Buzzer Hertz:</label>
+    <input required type='number' size='4' max='6000' min='1500' id='hertz' name='hertz' value='5000'><br>
+    <label for='timeLength'>Length of Buzeer(ms):
+    <input id='timeLength' name='timeLength' type='number' size='4' max='9999' min='0' required><br>
+    <br><input id='submit' name='submit' type='submit' value='Save'>
+    </form>
+  </body>
+</html>
+)rawliteral";
+
+String profileProcessor(const String& var){
+  if(var == "PROFILEPLACEHOLDER"){
+    return "01";
+  }
+}
+
 bool updateDome(String profileID){
   //Start preferences
-  profiles.begin("profiles", true);
+  profiles.begin("profiles", false);
 
   //Set color variable
   String colorProfile = profileID + "-color";
   char colorProfileChar[9];
   colorProfile.toCharArray(colorProfileChar, 9);
-  unsigned long color = profiles.getULong(colorProfileChar);
+  String color = profiles.getString(colorProfileChar).substring(1);
+  char totalColorValues[8];
+  color.toCharArray(totalColorValues, 8);
 
-  //Set hertz variable
-  String hertzProfile = profileID + "-hertz";
-  char hertzProfileChar[9];
-  hertzProfile.toCharArray(hertzProfileChar, 9);
-  int hertz = profiles.getInt(hertzProfileChar);
+  unsigned long colorValuesTotal = strtol(totalColorValues, NULL, 16);
+  byte r = colorValuesTotal >> 16;
+  byte g = colorValuesTotal >> 8;
+  byte b = colorValuesTotal;
 
   //Set timeLength variable
   String timeLengthProfile = profileID + "-timeLength";
@@ -85,17 +107,19 @@ bool updateDome(String profileID){
   int timeLength = profiles.getInt(timeLengthProfileChar);
 
   for (int i = 0; i < NUM_LEDS; i++){
-      leds[i] = color;
+      leds[i].setRGB( r, g, b);
     }
     FastLED.show();
-
-    ledcWriteTone(0, hertz);
+    Serial.println(timeLength);
+    digitalWrite(buzzerPin, HIGH);
     delay(timeLength);
-    ledcWriteTone(0, 0);
-    
-  profiles.end();
+    digitalWrite(buzzerPin, LOW);
 
   return profiles.isKey(colorProfileChar);
+
+  profiles.end();
+
+  
 
 }
 
@@ -137,60 +161,47 @@ void setup() {
     }
   });
 
+  server.on("/profile", HTTP_GET, [](AsyncWebServerRequest *request){
+    if(!request->authenticate(apiuser, apikey))
+     return request->requestAuthentication();
+     if (request->hasParam("submit")){
+       //Start preferences
+      profiles.begin("profiles", false);
+      String profileID = request->getParam("profileNumber")->value();
+
+      //Set color variable
+      String colorProfile = profileID + "-color";
+      char colorProfileChar[9];
+      colorProfile.toCharArray(colorProfileChar, 9);
+      String color = request->getParam("color")->value();
+      profiles.putString(colorProfileChar, color);
+
+      //Set timeLength variable
+      String timeLengthProfile = profileID + "-timeLength";
+      char timeLengthProfileChar[14];
+      timeLengthProfile.toCharArray(timeLengthProfileChar, 14);
+      profiles.putInt(timeLengthProfileChar, request->getParam("timeLength")->value().toInt());
+     }
+    request->send_P(200, "text/html", profileUpdate_html, profileProcessor);
+  });
+
   FastLED.addLeds<NEOPIXEL, ledPin>(leds, NUM_LEDS);
   pinMode(buttonPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
 
   //Start server
   server.begin();
 
   profiles.begin("profiles", false);
 
-  // OFF
-  profiles.putULong("00-color", 0x000000);
-  profiles.putInt("00-hertz", 0);
+  profiles.putString("00-color", "#000000");
   profiles.putInt("00-timeLength", 0);
-
-  //Yellow
-  profiles.putULong("01-color", 0xFFFF00);
-  profiles.putInt("01-hertz", 5000);
-  profiles.putInt("01-timeLength", 1000);
-  
-  //Green
-  profiles.putULong("02-color", 0x00FF00);
-  profiles.putInt("02-hertz", 5000);
-  profiles.putInt("02-timeLength", 1000);
-
-  //Red
-  profiles.putULong("03-color", 0xFF0000);
-  profiles.putInt("03-hertz", 5000);
-  profiles.putInt("03-timeLength", 1000);
-
-  //Blue
-  profiles.putULong("04-color", 0x0000FF);
-  profiles.putInt("04-hertz", 5000);
-  profiles.putInt("04-timeLength", 1000);
-
-  //Purple
-  profiles.putULong("05-color", 0xA020F0);
-  profiles.putInt("05-hertz", 5000);
-  profiles.putInt("05-timeLength", 1000);
-
-  // profiles.begin("profiles", false);
-  //Orange
-  profiles.putULong("06-color", 0xFFA500);
-  profiles.putInt("06-hertz", 1000);
-  profiles.putInt("06-timeLength", 3000);
 
   profiles.end();
 
-  ledcAttachPin(buzzerPin, 0);
-  
+  updateDome("00");
+
 }
 
 void loop() {
-  /*buttonState = digitalRead(buttonPin);
-  if (buttonState == HIGH){
-    updateDome(2);
-  }
-*/
 }
