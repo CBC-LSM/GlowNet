@@ -1,4 +1,4 @@
-#What is GlowNet?
+# What is GlowNet?
 
 GlowNet is a non-profit idea born out of a desire from other makers to develop a simple device that would go to protect people in volunerable areas, such as schools or churches.
 
@@ -17,16 +17,16 @@ Notifiation/Alert guide:
 You can fork the design here and make your own version, or simply export out what has been designed
 
 BOM:<br>
--(4) - [M3 Thread Inserts](https://a.co/d/j4Eid2X)
--(3) - [M2 Thread Inserts](https://a.co/d/)
--(2) - [M3x6 SHCS](https://a.co/d/eeJVUk0)
--(2) - [M3x10 FHCS](https://a.co/d/9gWt7kn)
--(3) - [1/4-20 x 2-1/2" Machine Screw](https://a.co/d/iGymJyz)
--(3) - [1/4" Fender Washer](https://a.co/d/4D97qNB)
--(3) - [1/4-20 Wing Nut](https://a.co/d/4D97qNB)
--(1) - [Adafruit 12 RGB LED](https://a.co/d/511ZWrK)
--(1) - [Piezo Buzzer](https://a.co/d/37FOyo1)
--(1) - [Olimex ESP32-POE](https://www.digikey.com/en/products/detail/olimex-ltd/ESP32-POE/10258717)
+- (4) - [M3 Thread Inserts](https://a.co/d/j4Eid2X)
+- (3) - [M2 Thread Inserts](https://a.co/d/)
+- (2) - [M3x6 SHCS](https://a.co/d/eeJVUk0)
+- (2) - [M3x10 FHCS](https://a.co/d/9gWt7kn)
+- (3) - [1/4-20 x 2-1/2" Machine Screw](https://a.co/d/iGymJyz)
+- (3) - [1/4" Fender Washer](https://a.co/d/4D97qNB)
+- (3) - [1/4-20 Wing Nut](https://a.co/d/4D97qNB)
+- (1) - [Adafruit 12 RGB LED](https://a.co/d/511ZWrK)
+- (1) - [Piezo Buzzer](https://a.co/d/37FOyo1)
+- (1) - [Olimex ESP32-POE](https://www.digikey.com/en/products/detail/olimex-ltd/ESP32-POE/10258717)
 
  ![glownet 3d model](/img/glownet3d.png)<br>
 
