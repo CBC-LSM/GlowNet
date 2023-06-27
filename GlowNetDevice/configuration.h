@@ -1,7 +1,7 @@
 //Settings to connect to a WiFi Network
-const char* ssid = "Egypt";
-const char* password = "L3tMyP30pl3G0@S3rv3";
+const char* ssid = "";
+const char* password = "";
 
 //API Login Credentials
-const char* apiuser = "api";
-const char* apikey = "tnvItcNnYn";
+const char* apiuser = "";
+const char* apikey = "";
