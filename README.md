@@ -21,4 +21,4 @@ BOM:<br>
  ![glownet 3d model](/img/glownet3d.png)<br>
 
 How to turn lights on with API call - for init testing
-http://<ip-address>/api?profile=01 - will turn the lights yellow and turn on buzzer for 1 second
+http://<i>ipaddress</i>/api?profile=01 - will turn the lights yellow and turn on buzzer for 1 second
