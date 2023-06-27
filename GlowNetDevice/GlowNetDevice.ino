@@ -110,7 +110,6 @@ bool updateDome(String profileID){
       leds[i].setRGB( r, g, b);
     }
     FastLED.show();
-    Serial.println(timeLength);
     digitalWrite(buzzerPin, HIGH);
     delay(timeLength);
     digitalWrite(buzzerPin, LOW);
@@ -197,6 +196,9 @@ void setup() {
   profiles.putString("00-color", "#000000");
   profiles.putInt("00-timeLength", 0);
 
+  profiles.putString("01-color", "#FFFFFF");
+  profiles.putInt("01-timeLength", 0);
+
   profiles.end();
 
   updateDome("00");
@@ -219,5 +221,9 @@ void setup() {
 
 
 void loop() {
-  
+  //Trigger Profile 01 on button press. 
+  buttonState = digitalRead(buttonPin);
+  if (buttonState == HIGH){
+    updateDome("01");
+  }
 }
