@@ -201,7 +201,23 @@ void setup() {
 
   updateDome("00");
 
+  //Startup sequence
+  for(int j = 0; j < 50; j++){
+    static uint8_t hue = 0;
+    for(int i = 0; i < NUM_LEDS; i++) {
+      // Set the i'th led to red 
+      leds[i] = CHSV(hue++, 255, 255);
+      // Show the leds
+      FastLED.show(); 
+      for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(250); }
+      // Wait a little bit before we loop around and do it again
+      delay(10);
+    }
+  }
+  updateDome("00");
 }
 
+
 void loop() {
+  
 }
