@@ -28,7 +28,8 @@ BOM:<br>
 - (1) - [Piezo Buzzer](https://a.co/d/37FOyo1)
 - (1) - [Olimex ESP32-POE](https://www.digikey.com/en/products/detail/olimex-ltd/ESP32-POE/10258717)
 
- ![glownet 3d model](/img/glownet3d.png)<br>
+![glownet 3d model](/img/glownet3d.png)<br>
+![glownet testing](/img/GlowNetFitTest.MOV)<br>
 
 How to turn lights on with API call - for init testing
 http://<i>ipaddress</i>/api?profile=01 - will turn the lights yellow and turn on buzzer for 1 second
