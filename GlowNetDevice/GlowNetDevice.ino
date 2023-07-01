@@ -83,43 +83,27 @@ String profileProcessor(const String& var){
   }
 }
 
-bool updateDome(String profileID){
-  //Start preferences
-  profiles.begin("profiles", false);
-
-  //Set color variable
-  String colorProfile = profileID + "-color";
-  char colorProfileChar[9];
-  colorProfile.toCharArray(colorProfileChar, 9);
-  String color = profiles.getString(colorProfileChar).substring(1);
+bool sendDomeCommand(String color, int buzzerLength){
+  String colorRecieved = color.substring(1);
   char totalColorValues[8];
-  color.toCharArray(totalColorValues, 8);
+  colorRecieved.toCharArray(totalColorValues, 8);
 
   unsigned long colorValuesTotal = strtol(totalColorValues, NULL, 16);
   byte r = colorValuesTotal >> 16;
   byte g = colorValuesTotal >> 8;
   byte b = colorValuesTotal;
 
-  //Set timeLength variable
-  String timeLengthProfile = profileID + "-timeLength";
-  char timeLengthProfileChar[14];
-  timeLengthProfile.toCharArray(timeLengthProfileChar, 14);
-  int timeLength = profiles.getInt(timeLengthProfileChar);
 
   for (int i = 0; i < NUM_LEDS; i++){
       leds[i].setRGB( r, g, b);
     }
     FastLED.show();
+    Serial.println(buzzerLength);
     digitalWrite(buzzerPin, HIGH);
-    delay(timeLength);
+    delay(buzzerLength);
     digitalWrite(buzzerPin, LOW);
 
-  return profiles.isKey(colorProfileChar);
-
-  profiles.end();
-
-  
-
+    return true;
 }
 
 void setup() {
@@ -148,15 +132,12 @@ void setup() {
   server.on("/api", HTTP_GET, [](AsyncWebServerRequest *request){
     if(!request->authenticate(apiuser, apikey))
      return request->requestAuthentication();
-    String profileNumber;
-    if (request->hasParam("profile")){
-      profileNumber = request->getParam("profile")->value();
-      if(updateDome(profileNumber)){
-        request->send(200, "text/html", "Success");
-      }
-      else if(!updateDome(profileNumber)){
-        request->send(406, "text/html", "Profile does not exist");
-      }
+    if ((request->hasParam("color")) && (request->hasParam("buzzer"))){
+      sendDomeCommand(request->getParam("color")->value(), request->getParam("buzzer")->value().toInt());
+      request->send(200, "text/html", "Success");
+    }
+    else{
+      request->send(400, "text/html", "Please submit a color and buzzer variables");
     }
   });
 
@@ -201,10 +182,13 @@ void setup() {
 
   profiles.end();
 
-  updateDome("00");
-
+  
   //Startup sequence
-  for(int j = 0; j < 50; j++){
+
+  digitalWrite(buzzerPin, HIGH);
+  
+
+  for(int j = 0; j < 30; j++){
     static uint8_t hue = 0;
     for(int i = 0; i < NUM_LEDS; i++) {
       // Set the i'th led to red 
@@ -216,7 +200,9 @@ void setup() {
       delay(10);
     }
   }
-  updateDome("00");
+  digitalWrite(buzzerPin, LOW);
+
+  sendDomeCommand("#000000", 0);
 }
 
 
@@ -224,6 +210,6 @@ void loop() {
   //Trigger Profile 01 on button press. 
   buttonState = digitalRead(buttonPin);
   if (buttonState == HIGH){
-    updateDome("01");
+    sendDomeCommand("#FFFFFF", 0);
   }
 }
