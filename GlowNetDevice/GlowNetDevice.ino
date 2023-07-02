@@ -1,3 +1,5 @@
+
+
 /*****************************
 This program is run on an ESP32 and accepts API requests to change an LED Ring's colors and send button presses back to a main console. 
 
@@ -13,14 +15,18 @@ This program is run on an ESP32 and accepts API requests to change an LED Ring's
 #include <ESPAsyncWebServer.h>
 #include <FastLED.h>
 #include <Preferences.h>
+#include "FS.h"
+#include "SD_MMC.h"
+#include "time.h"
 
 #include "configuration.h"
 
 //Define Pins
-const int ledPin = 3;
+const int ledPin = 0;
 const int buttonPin = 4;
-const int buzzerPin = 2;
+const int buzzerPin = 5;
 int buttonState = 0;
+byte lastButtonState = LOW;
 
 //Create LED ring object
 #define NUM_LEDS 12
@@ -28,6 +34,23 @@ CRGB leds[NUM_LEDS];
 
 //Set web server port
 AsyncWebServer server(80);
+
+const char* ntpServer = "pool.ntp.org";
+
+void appendFile(fs::FS &fs, const char * path, const char * message){
+    Serial.printf("Appending to file: %s\n", path);
+
+    File file = fs.open(path, FILE_APPEND);
+    if(!file){
+        Serial.println("Failed to open file for appending");
+        return;
+    }
+    if(file.print(message)){
+        Serial.println("Message appended");
+    } else {
+        Serial.println("Append failed");
+    }
+}
 
 //Fuction used to update the dome and send a buzzer sound.
 bool sendDomeCommand(String color, int buzzerLength){
@@ -46,17 +69,31 @@ bool sendDomeCommand(String color, int buzzerLength){
     }
     FastLED.show();
 
-    //Play buzzer for requested length
-    digitalWrite(buzzerPin, HIGH);
-    delay(buzzerLength);
-    digitalWrite(buzzerPin, LOW);
+  //Play buzzer for requested length
+  digitalWrite(buzzerPin, HIGH);
+  delay(buzzerLength);
+  digitalWrite(buzzerPin, LOW);
 
-    return true;
+  return true;
 }
 
 void setup() {
   Serial.begin(115200);  //Turn on serial connection
   delay(1000);
+
+  if(!SD_MMC.begin()){
+        Serial.println("Card Mount Failed");
+        return;
+    }
+
+
+  fs::FS &fs = SD_MMC;
+  const char * path = "/log.txt";
+
+  File log = fs.open(path, FILE_APPEND);
+  if(!log){
+      Serial.println("Failed to open file for appending");
+  }
 
   //Connect to WiFi network defined in configuration.h
   WiFi.mode(WIFI_STA);
@@ -72,18 +109,57 @@ void setup() {
   IPAddress IP = WiFi.localIP();
   Serial.println("\nDevice IP address: ");
   Serial.println(IP);
+  //Configure time variable
+  configTime(0, 0, ntpServer);
+
+  //Update Time
+  struct tm timeinfo;
+  getLocalTime(&timeinfo);
+  log.print(&timeinfo, "%A, %B %d %Y %H:%M:%S - ");
+  log.print("Connected to ");
+  log.print(ssid);
+  log.print(" with an IP Address of ");
+  log.println(IP);
 
   //Processor for api requests
   server.on("/api", HTTP_GET, [](AsyncWebServerRequest *request){
+    fs::FS &fs = SD_MMC;
+    const char * path = "/log.txt";
+
+    File log = fs.open(path, FILE_APPEND);
+    if(!log){
+        Serial.println("Failed to open file for appending");
+    }
     if(!request->authenticate(apiuser, apikey))
      return request->requestAuthentication();
     if ((request->hasParam("color")) && (request->hasParam("buzzer"))){
-      sendDomeCommand(request->getParam("color")->value(), request->getParam("buzzer")->value().toInt());
+      struct tm timeinfo;
+      getLocalTime(&timeinfo);
+      log.print(&timeinfo, "%A, %B %d %Y %H:%M:%S - ");
+      log.print("Received api request from ");
+      log.println(request->client()->remoteIP());
+
+      getLocalTime(&timeinfo);
+      log.print(&timeinfo, "%A, %B %d %Y %H:%M:%S - ");
+      log.print("Color recieved: ");
+      log.print(request->getParam("color")->value());
+      log.print(", buzzer length: ");
+      log.println(request->getParam("buzzer")->value());
+
+      if(sendDomeCommand(request->getParam("color")->value(), request->getParam("buzzer")->value().toInt())){
+        getLocalTime(&timeinfo);
+        log.print(&timeinfo, "%A, %B %d %Y %H:%M:%S - ");
+        log.println("Dome Updated");
+      }
       request->send(200, "text/html", "Success");
     }
     else{
       request->send(400, "text/html", "Please submit a color and buzzer variables");
     }
+  });
+
+  server.on("/log", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SD_MMC, "/log.txt", "text/plain");
   });
 
   //Creates FastLED Object
@@ -116,13 +192,31 @@ void setup() {
 
   //Turn off dome lights
   sendDomeCommand("#000000", 0);
+  
 }
 
 
 void loop() {
-  //Trigger Profile 01 on button press. 
-  buttonState = digitalRead(buttonPin);
-  if (buttonState == HIGH){
-    sendDomeCommand("#FFFFFF", 0);
+  //Trigger button press
+  byte buttonState = digitalRead(buttonPin);
+  if (buttonState != lastButtonState) {
+    buttonState = digitalRead(buttonPin);
+    if (buttonState == LOW){
+      sendDomeCommand("#FFFFFF", 0);
+
+      fs::FS &fs = SD_MMC;
+      const char * path = "/log.txt";
+
+      File log = fs.open(path, FILE_APPEND);
+      if(!log){
+          Serial.println("Failed to open file for appending");
+      }
+      struct tm timeinfo;
+      getLocalTime(&timeinfo);
+      log.print(&timeinfo, "%A, %B %d %Y %H:%M:%S - ");
+      log.println("Button Pressed");
+      
+      delay(100);
+    }
   }
 }
